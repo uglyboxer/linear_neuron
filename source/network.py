@@ -31,9 +31,59 @@ class Network:
         self.layers = layers
         self.learn_iter = learn_iter
 
-    def mse(self):     # Calculate Mean Squared Errorpass
-        pass
+    def mse(self, answer_vector, result_vector):
+        """ Calculates the mean squared error between two vector_size
+
+        Args:
+            answer_vector: a list
+            result_vector: a list
+
+        Returns:
+            a float
+        """
+
+        return sum([(answer_vector[i]-result_vector[i])**2 for i in
+                    range(len(answer_vector))]) / len(answer_vector)
 
     def diff_log_func(self):   # Differentiated Log Funciton
         pass
+
+    def learn_run(self):
+        pass
+
+    def run_unseen(self):
+        pass
+
+    def report_results(self):
+        pass
+
+
+class Neuron:
+
+    def __init__(self, vector_size):
+        self.threshold = threshold
+        self.weights = [0 fo x in vector_size+1]
+        self.weights[-1] = 1
+
+    def _append_bias(self):
+        pass
+
+    def _dot_product(self):
+        pass
+
+    def _sigmoid(self):
+        pass
+
+    def update_weights(self):
+        pass
+
+    def apply_backprop(self):
+        pass
+
+    def send_backprop(self):
+        pass
+
+    def fires(self):
+        pass
+
 
