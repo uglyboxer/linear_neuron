@@ -3,8 +3,14 @@
 # Tests for Network Class of linear_neuron project
 
 import unittest
-from source.network import Network
+from ..source.network import append_bias, Network, Neuron
+from ..source.network import Neuron 
 
+
+class NetworkHelperTests(unittest.TestCase):
+
+    def test_append_bias(self):
+        self.assertEqual(append_bias([0, 0, 0]), [0, 0, 0, 1])
 
 class NetworkTests(unittest.TestCase):
 
@@ -30,17 +36,16 @@ class NetworkTests(unittest.TestCase):
 
 class NeuronTests(unittest.TestCase):
 
-    def setup(self):
+    def setUp(self):
         self.neuron = Neuron(3)
 
-    def test_append_bias(self):
-        pass
-
     def test_dot_product(self):
-        pass
+        assert self.neuron._dot_product([4, 3, 2], [2, 3, 4]) == 25
 
     def test_sigmoid(self):
-        pass
+        assert self.neuron._sigmoid(0) == .5
+        assert self.neuron._sigmoid(1000000) == 1
+        self.assertAlmostEqual(self.neuron._sigmoid(-705), 0)
 
     def test_update_weights(self):
         pass
@@ -53,3 +58,6 @@ class NeuronTests(unittest.TestCase):
 
     def test_fires(self):
         pass
+
+
+
