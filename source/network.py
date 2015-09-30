@@ -6,6 +6,7 @@
 # circumstances.
 
 from math import e
+from random import choice
 
 from sklearn import datasets
 
@@ -53,12 +54,23 @@ class Network:
         Returns:
             a float
         """
-
         return sum([(answer_vector[i]-result_vector[i])**2 for i in
                     range(len(answer_vector))]) / len(answer_vector)
 
-    def diff_log_func(self):   # Differentiated Log Funciton
-        pass
+    def gradient_descent(self, vector, vector_index):
+        """ Calculates the gradient_descent 
+        
+        Args:
+            vector: a list
+            vector_index: an int  
+
+        Returns:
+            an int
+        """
+        learning_rate = .1
+        temp_list = [(self.neurons[x]._sigmoid(self.neurons[x]._dot_product(vector)) - self.neurons[x].expected[vector_index]) * self.neurons[x]._sigmoid(self.neurons[x]._dot_product(vector)) * (1 - self.neurons[x]._sigmoid(self.neurons[x]._dot_product(vector))) for x in self.neuron_count]
+        gd = -1 * learning_rate * sum(temp_list)
+        return gd
 
     def learn_run(self):
         """ Runs an iteration through the neuron sets and adjust the weights
@@ -67,9 +79,15 @@ class Network:
         for idx, vector in enumerate(self.train_set):
             for neuron in self.neurons:
                 neuron.train_pass(vector, idx)
+            gd = self.gradient_descent(vector, idx)       # Backpropogate the error
+            for neuron in self.neurons:
+                neuron.update_weights(gd, vector)
 
     def run_unseen(self):
+        """ Makes guesses on the unseen data """
+
         temp_guess_list = [[] for x in self.test_set]
+        temp_nofire_guess_list = [[] for x in self.test_set]
         for idy, vector in enumerate(self.test_set):
             
             for idx, neuron in enumerate(self.neurons):
@@ -78,10 +96,15 @@ class Network:
                     temp_guess_list[idy].append((nf[1], idx))
                 else:
                     temp_guess_list[idy].append((0, None))
+                    temp_nofire_guess_list[idy].append((nf[1], idx))
             temp_guess_list[idy].sort(reverse=True)
+            temp_nofire_guess_list[idy].sort(reverse=True)
         guess_list = [temp_guess_list[x][0][1] for x in range(len(self.test_set))]
-        return guess_list
-
+        nofire_guess_list = [temp_nofire_guess_list[x][0][1] for x in range(len(self.test_set))]
+        if temp_guess_list[0][0]:
+            return guess_list
+        else:
+            return nofire_guess_list
 
     def report_results(self, guess_list):
         """ Reports results of guesses on unseen set
@@ -112,7 +135,7 @@ class Neuron:
         self.answer_set = answer_set
         self.target = target 
         self.weights = [0 for x in range(vector_size + 1)]
-        #self.weights[-1] = 1
+        self.weights[-1] = 1
         self.sample_size = sample_size
         self.expected = [0 if y != self.target else 1 for y in self.answer_set]
         self.guesses = [0 for z in range(self.sample_size)]
@@ -144,7 +167,10 @@ class Neuron:
         return sum(elem * weight for elem, weight in zip(vector, self.weights))
 
     def _sigmoid(self, z):
-        return 1 / (1 + e ** (-z))
+        try:
+            return 1 / (1 + e ** (-z))
+        except:
+            return 0
 
     def update_weights(self, error, vector):
         """ Updates the weights stored in the receptors
@@ -204,9 +230,6 @@ def main():
     training_set, testing_set = digits.data[:1000], digits.data[1000:]
 
     # For all inputs
-    # vector_length = len(training_set[0])
-    # neurons = [Neuron(vector_length + 1, x, len(training_set)) for x in 
-    #             target_values]
     training_vectors = [append_bias(vector) for vector in training_set]
     test_vectors = [append_bias(vector) for vector in testing_set]
 

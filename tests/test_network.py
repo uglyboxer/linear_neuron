@@ -21,9 +21,6 @@ class NetworkTests(unittest.TestCase):
         assert self.network.mse([1, 1], [.75, .5]) == .15625
         assert self.network.mse([0], [0]) == 0
 
-    def test_diff_log_function(self):
-        pass
-
     def test_learn_run(self):
         pass
 
