@@ -15,7 +15,7 @@ class NetworkHelperTests(unittest.TestCase):
 class NetworkTests(unittest.TestCase):
 
     def setUp(self):
-        self.network = Network(2, 3, [20, 20, 20], [10, 10, 10], 1)
+        self.network = Network([2, 1, 3], 1, [20, 20, 20], [10, 10, 10], [20, 20, 20], [10, 10, 10])
 
     def test_mse(self):
         assert self.network.mse([1, 1], [.75, .5]) == .15625
@@ -37,7 +37,7 @@ class NetworkTests(unittest.TestCase):
 class NeuronTests(unittest.TestCase):
 
     def setUp(self):
-        self.neuron = Neuron(3)
+        self.neuron = Neuron(3, 1, 1, [2, 1, 3])
 
     def test_dot_product(self):
         assert self.neuron._dot_product([4, 3, 2], [2, 3, 4]) == 25

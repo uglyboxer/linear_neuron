@@ -7,31 +7,41 @@
 
 from math import e
 
+from sklearn import datasets
+
+
 
 class Network:
 
-    def __init__(self, neuron_count, vector_size, train_set, test_set,
-                 epoch_nums, layers=1, learn_iter=1):
+    def __init__(self, neuron_targets, vector_size, train_set, train_answers, 
+                test_set, test_answers, epoch_nums=100, layers=1, learn_iter=1):
         """ A Network instance will create layers of neurons for the implementa-
         tion of neural network.
 
         Args:
-            neuron_count: int
+            neuron_targets: list
             vector_size: int (training or test)
             train_set: a list or numpy array
+            train_answers: a list or numpy array
             test_set: a list or numpy array
+            test_answers: a list or numpy array
             epoch_nums: an int (the number of times backprop should occur)
             layers: int
             learn_iter: an int (the number of times before backprop)
         """
 
-        self.neuron_count = neuron_count    # Per layer
+        self.neuron_count = neuron_targets    # Per layer
         self.vector_size = vector_size
         self.train_set = train_set
+        self.train_answers = train_answers
         self.test_set = test_set
+        self.test_answers = test_answers
         self.epoch_nums = epoch_nums
         self.layers = layers
         self.learn_iter = learn_iter        # Size of leaning sets/iteration
+        self.neurons = [Neuron(self.vector_size, x, len(self.train_set), self.train_answers) 
+                        for x in self.neuron_count]
+        self.predictions = []
 
     def mse(self, answer_vector, result_vector):
         """ Calculates the mean squared error between two vector_size
@@ -54,12 +64,16 @@ class Network:
         """ Runs an iteration through the neuron sets and adjust the weights
         appropriately.
         """ 
-        for i in range(0, len(self.train_set), learn_iter):
-#### FIX    
-        
+        for vector in self.train_set:
+            for neuron in self.neurons:
+                neuron.train_pass(vector)
 
     def run_unseen(self):
-        pass
+        for vector in self.test_set:
+            temp = []
+            for idx, neuron in enumerate(self.neurons):
+                if neuron.fires(vector):
+                    temp.append(idx)
 
     def report_results(self):
         pass
@@ -67,17 +81,44 @@ class Network:
 
 class Neuron:
 
-    def __init__(self, vector_size):
+    def __init__(self, vector_size, target, sample_size, answer_set):
+        """ A class model for a single neuron
+
+        Args:
+            vector_size: int
+            target: int
+            sample_size: int
+            answer_set: list 
+        """
         self.threshold = .5
-        self.weights = [0 for x in range(vector_size+1)]
+        self.answer_set = answer_set
+        self.target = target 
+        self.weights = [0 for x in range(vector_size + 1)]
         self.weights[-1] = 1
+        self.sample_size = sample_size
+        self.expected = [0 if y != self.target else 1 for y in self.answer_set]
+        self.guesses = [0 for z in range(self.sample_size)]
+
+    
+    def train_pass(self, vector):
+        """ Passes a vector through the neuron once 
+
+        Args:
+            vector: a list
+        """
+        if self.fires(vector):
+            self.guesses[self.target] = 1
+        else:
+            self.guesses[self.target] = 0
+            error = self.expected[self.target] - self.guesses[self.target]
+            self.update_weights(error, vector)
 
     def _dot_product(self, vector, weights):
         """ Returns the dot product of two equal length vectors
 
         Args:
-            vector (list)
-            weights(list)
+            vector_size (int)
+            target (int)
 
         Returns:
             a float
@@ -87,8 +128,18 @@ class Neuron:
     def _sigmoid(self, z):
         return 1 / (1 + e ** (-z))
 
-    def update_weights(self):
-        pass
+    def update_weights(self, error, vector):
+        """ Updates the weights stored in the receptors
+
+        Args:
+            error (int)
+            vector(list)
+        Returns:
+            None
+        """
+        l_rate = .05
+        for idx, item in enumerate(vector):
+            self.weights[idx] += (item * l_rate * error)
 
     def apply_backprop(self):
         pass
@@ -96,8 +147,19 @@ class Neuron:
     def send_backprop(self):
         pass
 
-    def fires(self):
-        pass
+    def fires(self, vector):
+        """ Takes an input vector and decides if neuron fires or not 
+        
+        Args:
+            vector - a list 
+
+        Returns:
+            a boolean
+        """
+        if self._dot_product(vector, self.weights) > self.threshold:
+            return True
+        else:
+            return False
         
 
 def append_bias(vector):
@@ -112,3 +174,24 @@ def append_bias(vector):
     temp_vector = [x for x in vector]
     temp_vector.append(1)
     return temp_vector
+
+def main():
+    # Dependent on input set
+    digits = datasets.load_digits()
+    target_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    answers, answers_to_test = digits.target[:1000], digits.target[1000:]
+    training_set, testing_set = digits.data[:1000], digits.data[1000:]
+
+    # For all inputs
+    # vector_length = len(training_set[0])
+    # neurons = [Neuron(vector_length + 1, x, len(training_set)) for x in 
+    #             target_values]
+    training_vectors = [append_bias(vector) for vector in training_set]
+    test_vectors = [append_bias(vector) for vector in testing_set]
+
+    network = Network(target_values, len(training_set[0]), training_vectors, answers, test_vectors, answers_to_test)
+    network.learn_run()
+    network.run_unseen()
+
+if __name__ == '__main__':
+    main()
