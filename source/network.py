@@ -64,19 +64,37 @@ class Network:
         """ Runs an iteration through the neuron sets and adjust the weights
         appropriately.
         """ 
-        for vector in self.train_set:
+        for idx, vector in enumerate(self.train_set):
             for neuron in self.neurons:
-                neuron.train_pass(vector)
+                neuron.train_pass(vector, idx)
 
     def run_unseen(self):
-        for vector in self.test_set:
-            temp = []
+        temp_guess_list = [[] for x in self.test_set]
+        for idy, vector in enumerate(self.test_set):
+            
             for idx, neuron in enumerate(self.neurons):
-                if neuron.fires(vector):
-                    temp.append(idx)
+                nf = neuron.fires(vector)
+                if nf[0]:
+                    temp_guess_list[idy].append((nf[1], idx))
+                else:
+                    temp_guess_list[idy].append((0, None))
+            temp_guess_list[idy].sort(reverse=True)
+        guess_list = [temp_guess_list[x][0][1] for x in range(len(self.test_set))]
+        return guess_list
 
-    def report_results(self):
-        pass
+
+    def report_results(self, guess_list):
+        """ Reports results of guesses on unseen set
+
+        Args:
+            guess_list: a list 
+        """
+        successes = 0
+        for idx, item in enumerate(guess_list):
+            if self.test_answers[idx] == item:
+                successes += 1
+        print("Successes: {}  Out of total: {}".format(successes, len(guess_list)))
+        print("For a success rate of: ", successes/len(guess_list))
 
 
 class Neuron:
@@ -94,36 +112,36 @@ class Neuron:
         self.answer_set = answer_set
         self.target = target 
         self.weights = [0 for x in range(vector_size + 1)]
-        self.weights[-1] = 1
+        #self.weights[-1] = 1
         self.sample_size = sample_size
         self.expected = [0 if y != self.target else 1 for y in self.answer_set]
         self.guesses = [0 for z in range(self.sample_size)]
 
     
-    def train_pass(self, vector):
+    def train_pass(self, vector, idx):
         """ Passes a vector through the neuron once 
 
         Args:
             vector: a list
-        """
-        if self.fires(vector):
-            self.guesses[self.target] = 1
+            idx: an int         # The position of the vector in the sample 
+        """ 
+        if self.fires(vector)[0]:
+            self.guesses[idx] = 1
         else:
-            self.guesses[self.target] = 0
-            error = self.expected[self.target] - self.guesses[self.target]
-            self.update_weights(error, vector)
+            self.guesses[idx] = 0
+        error = self.expected[idx] - self.guesses[idx]
+        self.update_weights(error, vector)
 
-    def _dot_product(self, vector, weights):
+    def _dot_product(self, vector):
         """ Returns the dot product of two equal length vectors
 
         Args:
-            vector_size (int)
-            target (int)
+            vector: a list
 
         Returns:
             a float
         """
-        return sum(elem * weight for elem, weight in zip(vector, weights))
+        return sum(elem * weight for elem, weight in zip(vector, self.weights))
 
     def _sigmoid(self, z):
         return 1 / (1 + e ** (-z))
@@ -155,11 +173,14 @@ class Neuron:
 
         Returns:
             a boolean
+            a float             # The dot product of the vector and weights 
         """
-        if self._dot_product(vector, self.weights) > self.threshold:
-            return True
+        dp = self._dot_product(vector)
+        if dp > self.threshold:
+
+            return True, dp
         else:
-            return False
+            return False, dp
         
 
 def append_bias(vector):
@@ -190,8 +211,8 @@ def main():
     test_vectors = [append_bias(vector) for vector in testing_set]
 
     network = Network(target_values, len(training_set[0]), training_vectors, answers, test_vectors, answers_to_test)
-    network.learn_run()
-    network.run_unseen()
+    [network.learn_run() for x in range(500)]
+    network.report_results(network.run_unseen())
 
 if __name__ == '__main__':
     main()
