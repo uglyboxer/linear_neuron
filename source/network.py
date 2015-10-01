@@ -34,7 +34,7 @@
 from math import e
 from random import choice
 
-from sklearn import datasets
+from sklearn import datasets, utils
 
 
 class Network:
@@ -273,11 +273,13 @@ def append_bias(vector):
 
 def main():
     # Dependent on input set
-    digits = datasets.load_digits()
+    temp_digits = datasets.load_digits()
+    digits = utils.resample(temp_digits.data, random_state=0)
+    temp_answers = utils.resample(temp_digits.target, random_state=0)
     target_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    num_of_training_vectors = 1100
-    answers, answers_to_test, validation_answers = digits.target[:num_of_training_vectors], digits.target[num_of_training_vectors:num_of_training_vectors+400], digits.target[num_of_training_vectors+400:]
-    training_set, testing_set, validation_set = digits.data[:num_of_training_vectors], digits.data[num_of_training_vectors:num_of_training_vectors+400], digits.data[num_of_training_vectors+400:]
+    num_of_training_vectors = 950
+    answers, answers_to_test, validation_answers = temp_answers[:num_of_training_vectors], temp_answers[num_of_training_vectors:num_of_training_vectors+500], temp_answers[num_of_training_vectors+500:]
+    training_set, testing_set, validation_set = digits[:num_of_training_vectors], digits[num_of_training_vectors:num_of_training_vectors+500], digits[num_of_training_vectors+500:]
 
     # For all inputs
     training_vectors = [append_bias(vector) for vector in training_set]
