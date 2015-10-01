@@ -34,17 +34,19 @@
 from math import e
 from random import choice
 
+from matplotlib import pyplot
 from sklearn import datasets, utils
 
 
 class Network:
 
-    def __init__(self, neuron_targets, vector_size, train_set, train_answers,
+    def __init__(self, images, neuron_targets, vector_size, train_set, train_answers,
                  test_set, test_answers, validation_set, validation_answers):
         """ A Network instance will create layers of neurons for the implementa-
         tion of neural network.
 
         Args:
+            images(list): corresponding images of the dataset
             neuron_targets(list): the possible final output values 
             vector_size(int): size of the individual input vectors
             train_set(list): set of vectors for the learning portion
@@ -62,8 +64,8 @@ class Network:
 
 
         """
-
-        self.neuron_count = neuron_targets    # Per layer
+        self.images = images
+        self.neuron_count = neuron_targets   
         self.vector_size = vector_size
         self.train_set = train_set
         self.train_answers = train_answers
@@ -154,12 +156,19 @@ class Network:
         """
         if validation:
             self.test_answers = self.validation_answers
+            print("I guess this is a: ", guess_list[1])
+            pyplot.imshow(self.images[1451], cmap="Greys", interpolation='nearest')
+            pyplot.show()
         successes = 0
         for idx, item in enumerate(guess_list):
             if self.test_answers[idx] == item:
                 successes += 1
         print("Successes: {}  Out of total: {}".format(successes, len(guess_list)))
         print("For a success rate of: ", successes/len(guess_list))
+        
+        
+
+
 
 
 class Neuron:
@@ -199,7 +208,6 @@ class Neuron:
                 self.guesses[idx] = 0
             self.update_weights(error, vector)
             return None
-#### Look at this again
 
     def _dot_product(self, vector):
         """ Returns the dot product of two equal length vectors
@@ -276,6 +284,7 @@ def main():
     temp_digits = datasets.load_digits()
     digits = utils.resample(temp_digits.data, random_state=0)
     temp_answers = utils.resample(temp_digits.target, random_state=0)
+    images = utils.resample(temp_digits.images, random_state=0)
     target_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     num_of_training_vectors = 950
     answers, answers_to_test, validation_answers = temp_answers[:num_of_training_vectors], temp_answers[num_of_training_vectors:num_of_training_vectors+500], temp_answers[num_of_training_vectors+500:]
@@ -285,7 +294,7 @@ def main():
     training_vectors = [append_bias(vector) for vector in training_set]
     test_vectors = [append_bias(vector) for vector in testing_set]
 
-    network = Network(target_values, len(training_set[0]), training_vectors,
+    network = Network(images, target_values, len(training_set[0]), training_vectors,
                       answers, test_vectors, answers_to_test, validation_set, validation_answers)
     [network.learn_run() for x in range(250)]
     network.report_results(network.run_unseen())
