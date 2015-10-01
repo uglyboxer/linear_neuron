@@ -1,9 +1,35 @@
 # Author: Cole Howard
 #
-# network.py is a basic implementation of a one layer neural network, to
-# examine an implementation of backpropagation.  The intent is to make it
-# extensible as a tool for exploring neural nets under more general
-# circumstances.
+# network.py is a basic implementation of a one layer linear neural network, to
+# examine an implementation of backpropagation.  It is based on the basic model
+# of the Perceptron.  Information on that can be found at:
+# https://en.wikipedia.org/wiki/Perceptron
+#  The intent of this specific project is to alter the Perceptron's
+# decision function to a logistic function and add a "backpropagation" step
+# at the end of each vector's pass through the neuron.
+#
+# There are several methods included that are currently passed, as they are
+# plans to make it extensible as possible as a tool for exploring neural nets
+# under more general circumstances.
+#
+# Usage:
+#   It is currently set up to run a training set of input (along with the
+#   associated answers) and a set of similar, but distinct, input (without)
+#   the answers, and have the machine guess an answer to each of those cases
+#   based on information it gathered during the training run.
+#
+#   To execute as is, from the command line, while in the linear_neuron/source/
+#   directory, input:
+#
+#       $ python3 network.py
+#
+#   This will pull the learning and test data from scikit-learn run both and
+#   return a success count, total count of the unseen test data, and the
+#   success rate that equals.
+#
+# Alternate data sets:
+#   Alternate training and testing data sets can be swapped out in the first
+#   section of main() below.  See those notes for specifics.
 
 from math import e
 from random import choice
@@ -14,21 +40,27 @@ from sklearn import datasets
 class Network:
 
     def __init__(self, neuron_targets, vector_size, train_set, train_answers,
-                 test_set, test_answers, epoch_nums=100, layers=1,
-                 learn_iter=1):
+                 test_set, test_answers, validation_set, validation_answers):
         """ A Network instance will create layers of neurons for the implementa-
         tion of neural network.
 
         Args:
-            neuron_targets: list
-            vector_size: int (training or test)
-            train_set: a list or numpy array
-            train_answers: a list or numpy array
-            test_set: a list or numpy array
-            test_answers: a list or numpy array
-            epoch_nums: an int (the number of times backprop should occur)
-            layers: int
-            learn_iter: an int (the number of times before backprop)
+            neuron_targets(list): the possible final output values 
+            vector_size(int): size of the individual input vectors
+            train_set(list): set of vectors for the learning portion
+            train_answers(list): correct answers that correspond to the 
+                                 train_set
+            test_set(list): set of vectors, discrete from the train_set to have
+                            the machine guess against
+            test_answers(list): correct answers for the test_set, to compare
+                                the machine's guesses against
+            validation_set(list): a validation set to compare answers in a 
+                                  second run
+            validation_answers(list): answer for the above
+
+        Attributes:
+
+
         """
 
         self.neuron_count = neuron_targets    # Per layer
@@ -37,9 +69,8 @@ class Network:
         self.train_answers = train_answers
         self.test_set = test_set
         self.test_answers = test_answers
-        self.epoch_nums = epoch_nums
-        self.layers = layers
-        self.learn_iter = learn_iter        # Size of leaning sets/iteration
+        self.validation_set = validation_set
+        self.validation_answers = validation_answers
         self.neurons = [Neuron(self.vector_size, x, len(self.train_set),
                         self.train_answers) for x in self.neuron_count]
         self.predictions = []
@@ -68,6 +99,9 @@ class Network:
             an int
         """
         learning_rate = .05
+        
+        ### Check this against( -1*sum(x*y(1-y)(t-y) for each vector component))
+        ### Formula at end of lecture 3c (Hinton)
         temp_list = [(self.neurons[x]._sigmoid(self.neurons[x]._dot_product(vector)) - self.neurons[x].expected[vector_index]) * self.neurons[x]._sigmoid(self.neurons[x]._dot_product(vector)) * (1 - self.neurons[x]._sigmoid(self.neurons[x]._dot_product(vector))) for x in self.neuron_count]
         gd = -1 * learning_rate * sum(temp_list)
         return gd
@@ -79,18 +113,19 @@ class Network:
         for idx, vector in enumerate(self.train_set):
             for neuron in self.neurons:
                 neuron.train_pass(vector, idx)
-            gd = self.gradient_descent(vector, idx)    # Backpropogate the error
+            gd = self.gradient_descent(vector, idx)   # Backpropogate the error
             for neuron in self.neurons:
                 neuron.update_weights(gd, vector)
 
-    def run_unseen(self):
+    def run_unseen(self, validation = False):
         """ Makes guesses on the unseen data
 
         Returns:
             a list of ints (the guesses for each vector)
 
         """
-
+        if validation:
+            self.test_set = self.validation_set
         temp_guess_list = [[] for x in self.test_set]
         temp_dud_guess_list = [[] for x in self.test_set]
         for idy, vector in enumerate(self.test_set):
@@ -107,16 +142,18 @@ class Network:
             temp_dud_guess_list[idy].sort(reverse=True)
         guess_list = [x[0][1] for x in temp_guess_list]
         dud_guess_list = [x[0][1] for x in temp_dud_guess_list]
-        new_guess_list = [x if (x != None) else dud_guess_list[idx] for
+        new_guess_list = [x if (x is not None) else dud_guess_list[idx] for
                           idx, x in enumerate(guess_list)]
         return new_guess_list
 
-    def report_results(self, guess_list):
+    def report_results(self, guess_list, validation=False):
         """ Reports results of guesses on unseen set
 
         Args:
             guess_list: a list 
         """
+        if validation:
+            self.test_answers = self.validation_answers
         successes = 0
         for idx, item in enumerate(guess_list):
             if self.test_answers[idx] == item:
@@ -213,7 +250,7 @@ class Neuron:
             a float             # The dot product of the vector and weights
         """
         dp = self._dot_product(vector)
-        if dp > self.threshold:
+        if self._sigmoid(dp) > self.threshold:
 
             return True, dp
         else:
@@ -238,18 +275,19 @@ def main():
     # Dependent on input set
     digits = datasets.load_digits()
     target_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    num_of_training_vectors = 950
-    answers, answers_to_test = digits.target[:num_of_training_vectors], digits.target[num_of_training_vectors:]
-    training_set, testing_set = digits.data[:num_of_training_vectors], digits.data[num_of_training_vectors:]
+    num_of_training_vectors = 1100
+    answers, answers_to_test, validation_answers = digits.target[:num_of_training_vectors], digits.target[num_of_training_vectors:num_of_training_vectors+400], digits.target[num_of_training_vectors+400:]
+    training_set, testing_set, validation_set = digits.data[:num_of_training_vectors], digits.data[num_of_training_vectors:num_of_training_vectors+400], digits.data[num_of_training_vectors+400:]
 
     # For all inputs
     training_vectors = [append_bias(vector) for vector in training_set]
     test_vectors = [append_bias(vector) for vector in testing_set]
 
     network = Network(target_values, len(training_set[0]), training_vectors,
-                      answers, test_vectors, answers_to_test)
+                      answers, test_vectors, answers_to_test, validation_set, validation_answers)
     [network.learn_run() for x in range(250)]
     network.report_results(network.run_unseen())
+    network.report_results(network.run_unseen(True), True)
 
 if __name__ == '__main__':
     main()
