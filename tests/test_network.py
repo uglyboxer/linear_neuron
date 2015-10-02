@@ -4,7 +4,7 @@
 
 import unittest
 from ..source.network import append_bias, Network, Neuron
-from ..source.network import Neuron 
+from ..source.neuron import Neuron 
 
 
 class NetworkHelperTests(unittest.TestCase):
@@ -16,10 +16,6 @@ class NetworkTests(unittest.TestCase):
 
     def setUp(self):
         self.network = Network([2, 1, 3], 1, [20, 20, 20], [10, 10, 10], [20, 20, 20], [10, 10, 10])
-
-    def test_mse(self):
-        assert self.network.mse([1, 1], [.75, .5]) == .15625
-        assert self.network.mse([0], [0]) == 0
 
     def test_learn_run(self):
         pass
@@ -45,12 +41,6 @@ class NeuronTests(unittest.TestCase):
         self.assertAlmostEqual(self.neuron._sigmoid(-705), 0)
 
     def test_update_weights(self):
-        pass
-
-    def test_apply_backprop(self):
-        pass
-
-    def test_send_backprop(self):
         pass
 
     def test_fires(self):

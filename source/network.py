@@ -31,11 +31,12 @@
 #   Alternate training and testing data sets can be swapped out in the first
 #   section of main() below.  See those notes for specifics.
 
-from math import e
 from random import choice
 
 from matplotlib import pyplot
 from sklearn import datasets, utils
+
+from neuron import Neuron
 
 
 class Network:
@@ -77,18 +78,6 @@ class Network:
                         self.train_answers) for x in self.neuron_count]
         self.predictions = []
 
-    def mse(self, answer_vector, result_vector):
-        """ Calculates the mean squared error between two vector_size
-
-        Args:
-            answer_vector: a list
-            result_vector: a list
-
-        Returns:
-            a float
-        """
-        return sum([(answer_vector[i]-result_vector[i])**2 for i in
-                    range(len(answer_vector))]) / len(answer_vector)
 
     def gradient_descent(self, vector, vector_index):
         """ Calculates the gradient_descent
@@ -152,117 +141,21 @@ class Network:
         """ Reports results of guesses on unseen set
 
         Args:
-            guess_list: a list 
+            guess_list: a list
         """
         if validation:
             self.test_answers = self.validation_answers
             print("I guess this is a: ", guess_list[1])
-            pyplot.imshow(self.images[1451], cmap="Greys", interpolation='nearest')
+            pyplot.imshow(self.images[1451], cmap="Greys",
+                          interpolation='nearest')
             pyplot.show()
         successes = 0
         for idx, item in enumerate(guess_list):
             if self.test_answers[idx] == item:
                 successes += 1
-        print("Successes: {}  Out of total: {}".format(successes, len(guess_list)))
+        print("Successes: {}  Out of total: {}".format(successes,
+              len(guess_list)))
         print("For a success rate of: ", successes/len(guess_list))
-        
-        
-
-
-
-
-class Neuron:
-
-    def __init__(self, vector_size, target, sample_size, answer_set):
-        """ A class model for a single neuron
-
-        Args:
-            vector_size: int
-            target: int
-            sample_size: int
-            answer_set: list
-        """
-        self.threshold = .5
-        self.answer_set = answer_set
-        self.target = target
-        self.weights = [0 for x in range(vector_size + 1)]
-        self.weights[-1] = 1
-        self.sample_size = sample_size
-        self.expected = [0 if y != self.target else 1 for y in self.answer_set]
-        self.guesses = [0 for z in range(self.sample_size)]
-
-    def train_pass(self, vector, idx):
-        """ Passes a vector through the neuron once
-
-        Args:
-            vector: a list
-            idx: an int         # The position of the vector in the sample
-        """
-        if self.expected == self.guesses:
-            return None
-        else:
-            error = self.expected[idx] - self.guesses[idx]
-            if self.fires(vector)[0]:
-                self.guesses[idx] = 1
-            else:
-                self.guesses[idx] = 0
-            self.update_weights(error, vector)
-            return None
-
-    def _dot_product(self, vector):
-        """ Returns the dot product of two equal length vectors
-
-        Args:
-            vector: a list
-
-        Returns:
-            a float
-        """
-        return sum(elem * weight for elem, weight in zip(vector, self.weights))
-
-    def _sigmoid(self, z):
-        if -700 < z < 700:
-            return 1 / (1 + e ** (-z))
-        elif z < -700:
-            return 0
-        else:
-            return 1
-
-    def update_weights(self, error, vector):
-        """ Updates the weights stored in the receptors
-
-        Args:
-            error (int)
-            vector(list)
-        Returns:
-            None
-        """
-        l_rate = .05
-        for idx, item in enumerate(vector):
-            self.weights[idx] += (item * l_rate * error)
-
-    def apply_backprop(self):
-        pass
-
-    def send_backprop(self):
-        pass
-
-    def fires(self, vector):
-        """ Takes an input vector and decides if neuron fires or not
-
-        Args:
-            vector - a list
-
-        Returns:
-            a boolean
-            a float             # The dot product of the vector and weights
-        """
-        dp = self._dot_product(vector)
-        if self._sigmoid(dp) > self.threshold:
-
-            return True, dp
-        else:
-            return False, dp
 
 
 def append_bias(vector):
@@ -294,8 +187,7 @@ def main():
     training_vectors = [append_bias(vector) for vector in training_set]
     test_vectors = [append_bias(vector) for vector in testing_set]
 
-    network = Network(images, target_values, len(training_set[0]), training_vectors,
-                      answers, test_vectors, answers_to_test, validation_set, validation_answers)
+    network = Network(images, target_values, len(training_set[0]), training_vectors, answers, test_vectors, answers_to_test, validation_set, validation_answers)
     [network.learn_run() for x in range(250)]
     network.report_results(network.run_unseen())
     network.report_results(network.run_unseen(True), True)
