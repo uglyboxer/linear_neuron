@@ -27,9 +27,18 @@
 #   return a success count, total count of the unseen test data, and the
 #   success rate that equals.
 #
+#   First output and success ratio will be based on the first set of testing
+#   vectors.  The second set will represent the same for the validation
+#   set.  The visualization (see below) that pops up, just close that window
+#   for the script to finish running.
+#
 # Alternate data sets:
 #   Alternate training and testing data sets can be swapped out in the first
 #   section of main() below.  See those notes for specifics.
+#
+# Visualization:
+#  Pyplot is included to provide a visual representation of a memember of the
+#  dataset.
 
 from random import choice
 
@@ -48,7 +57,7 @@ class Network:
     images : list
         Corresponding images of the dataset
     neuron_targets : list
-        The possible final output values 
+        The possible final output values
     vector_size : int
         Size of the individual input vectors
     train_set : list
@@ -194,7 +203,7 @@ class Network:
             print("I guess this is a: ", guess_list[1])
             plt.imshow(self.images[1451], cmap="Greys",
                        interpolation='nearest')
-            pyplot.show()
+            plt.show()
         successes = 0
         for idx, item in enumerate(guess_list):
             if self.test_answers[idx] == item:
