@@ -4,6 +4,7 @@ Projects:
 
 Machine Learning:
 
+10/1/15
 - Initial foray into machine learning was an implementation of a basic Perceptron (image) on the Handwritten Digits sets from scikit-learn.  The 8x8 pixel images in grayscale number 1797, and have been adjust for skewing.  
   (Data image) (Image).  
  The first completed test resulted in a 75% success rate on guessing the correct value of image from the set of data the trained algorithm had not seen.  Adjusting the hyperparameters, it turned out that with this model, it was over-fitting the data and adjusting the number of training cases down, was inversely proportional to the success rate.  The sweet spot seemed to be around 950 training cases and leaving the 1200 for the guessing. 
