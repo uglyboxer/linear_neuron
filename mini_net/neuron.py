@@ -1,20 +1,20 @@
-# Author: Cole Howard
-#
-# neuron.py is a basic linear neuron, that can be used in a perceptron
-# Information on that can be found at:
-# https://en.wikipedia.org/wiki/Perceptron
-#
-# It was written as a class specifically for network ()
-#
-# Usage:
-#   From any python script:
-#
-#       from neuron import Neuron
-#
-# API:
-#   update_weights, fires are the accessible methods
-#   usage noted in their definitions
+"""Author: Cole Howard
+Email: uglyboxer@gmail.com
+neuron.py is a basic linear neuron, that can be used in a perceptron
+Information on that can be found at:
+https://en.wikipedia.org/wiki/Perceptron
 
+It was written as a class specifically for network ()
+
+Usage:
+  From any python script:
+
+      from neuron import Neuron
+
+API:
+  update_weights, fires are the accessible methods
+  usage noted in their definitions
+"""
 
 from math import e
 from numpy import append as app
