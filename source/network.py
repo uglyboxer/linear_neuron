@@ -43,6 +43,7 @@
 from random import choice
 
 from matplotlib import pyplot as plt
+from numpy import dot
 from sklearn import datasets, utils
 
 from neuron import Neuron
@@ -122,12 +123,14 @@ class Network:
         """
 
         learning_rate = .05
-        temp_list = [(self.neurons[x]._sigmoid(self.neurons[x]._dot_product(
-                     vector)) - self.neurons[x].expected[vector_index]) *
-                     self.neurons[x]._sigmoid(
-                     self.neurons[x]._dot_product(vector)) * (1 -
-                     self.neurons[x]._sigmoid(self.neurons[x]._dot_product(
-                      vector))) for x in self.neuron_count]
+        temp_list = []
+        for x in self.neuron_count:
+            dp = self.neurons[x]._dot_product(vector)
+            temp_list.append(((self.neurons[x]._sigmoid(dp)) -
+                             self.neurons[x].expected[vector_index]) *
+                             self.neurons[x]._sigmoid(dp) * (1 -
+                             self.neurons[x]._sigmoid(dp)))
+
         gd = -1 * learning_rate * sum(temp_list)
         return gd
 
@@ -200,10 +203,10 @@ class Network:
         """
         if validation:
             self.test_answers = self.validation_answers
-            print("I guess this is a: ", guess_list[1])
-            plt.imshow(self.images[1451], cmap="Greys",
-                       interpolation='nearest')
-            plt.show()
+            # print("I guess this is a: ", guess_list[1])
+            # plt.imshow(self.images[1451], cmap="Greys",
+            #            interpolation='nearest')
+            # plt.show()
         successes = 0
         for idx, item in enumerate(guess_list):
             if self.test_answers[idx] == item:

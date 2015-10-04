@@ -17,6 +17,8 @@
 
 
 from math import e
+from numpy import append as app
+from numpy import dot
 
 
 class Neuron:
@@ -103,8 +105,9 @@ class Neuron:
             The sum for all of each element of a vector multiplied by its
             corresponding element in a second vector.
         """
-
-        return sum(elem * weight for elem, weight in zip(vector, self.weights))
+        if len(vector) < len(self.weights):
+            vector = app(vector, 1)
+        return dot(vector, self.weights)
 
     def _sigmoid(self, z):
         """ Calculates the output of a logistic function
