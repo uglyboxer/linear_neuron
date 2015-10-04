@@ -27,12 +27,14 @@ Usage:
   the answers, and have the machine guess an answer to each of those cases
   based on information it gathered during the training run.
 
-  To import the network for testin on other data:
+  To import the network for testing on other data:
 
-    from mini_net import network.Network
-    from mini_net import neuron.Neuron
+    download the package mini_net, 
+    then include in your script:
 
-  To execute as is, from the command line, while in the linear_neuron/source/
+        from network import Network
+
+  To execute as is, from the command line, while in the linear_neuron/mini_net/
   directory, input:
 
       $ python3 network.py
@@ -53,7 +55,7 @@ Alternate data sets:
 Visualization:
  Pyplot is included to provide a visual representation of a member of the
  dataset.
- """    
+ """
 
 from matplotlib import pyplot as plt
 from numpy import dot
