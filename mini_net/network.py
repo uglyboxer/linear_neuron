@@ -163,6 +163,10 @@ class Network:
             for idx, vector in enumerate(self.train_set):
                 for neuron in self.neurons:
                     neuron.train_pass(vector, idx)
+            # Make Numpy array, then run train_pass on it
+
+
+
                 gd = self.gradient_descent(vector, idx)   # Backpropogate the error
                 for neuron in self.neurons:
                     neuron.update_weights(gd, vector)
