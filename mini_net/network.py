@@ -34,10 +34,12 @@ Usage:
 
         from network import Network
 
+
   To execute as is, from the command line, while in the linear_neuron/mini_net/
   directory, input:
 
       $ python3 network.py
+
 
   This will pull the learning and test data from scikit-learn run both and
   return a success count, total count of the unseen test data, and the
