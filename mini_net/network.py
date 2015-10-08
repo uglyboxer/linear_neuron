@@ -34,10 +34,12 @@ Usage:
 
         from network import Network
 
+
   To execute as is, from the command line, while in the linear_neuron/mini_net/
   directory, input:
 
       $ python3 network.py
+
 
   This will pull the learning and test data from scikit-learn run both and
   return a success count, total count of the unseen test data, and the
@@ -220,6 +222,7 @@ class Network:
         guess_list : list
 
         """
+
         if validation:
             self.test_answers = self.validation_answers
             # print("I guess this is a: ", guess_list[1])
@@ -233,7 +236,6 @@ class Network:
         print("Successes: {}  Out of total: {}".format(successes,
               len(guess_list)))
         print("For a success rate of: ", successes/len(guess_list))
-
 
     def append_bias(self, vector):
         """ Takes a list of n entries and appends a 1 for the bias
@@ -257,6 +259,7 @@ class Network:
             The input vector with a one appended to the end of the list, as
             a bias
         """
+
         temp_vector = [x for x in vector]
         temp_vector.append(1)
         return temp_vector
