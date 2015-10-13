@@ -299,6 +299,7 @@ def main():
     print(network.neurons[1].weights)
     x = np.random.normal(128, 1, (8, 8))
     y = x.flatten()
+    # y = network.test_set[0][:-1]
     network.test_set = [y]
     visualization(y)
     guess = network.run_unseen()
@@ -306,12 +307,11 @@ def main():
     # print(y)
     # input("Hit a key to continue")
     target_values.remove(guess[0])
-    for i in range(5000):
-        y = feedback(y, network.neurons[guess[0]].weights, 7)
+    for i in range(10):
+        y = feedback(y, network.neurons[guess[0]].weights, .001)
         for x in target_values:
-            y = feedback(y, network.neurons[x].weights, -.15)
+            y = feedback(y, network.neurons[x].weights, -.0001)
     visualization(y)
-        # print(y)
     network.test_set = [y]
     guess = network.run_unseen()
     print(guess)
