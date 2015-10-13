@@ -41,10 +41,14 @@
 #  dataset.
 
 from random import choice
+from time import sleep
 
+from matplotlib import cm
 from matplotlib import pyplot as plt
+import numpy as np
 from sklearn import datasets, utils
 
+from feedback import feedback
 from neuron import Neuron
 
 
@@ -240,6 +244,15 @@ def append_bias(vector):
     return temp_vector
 
 
+def visualization(vector):
+    y = np.reshape(vector, (8,8))
+    plt.imshow(y, cmap=cm.Greys_r)
+    plt.pause(0.0001)
+    plt.show()
+    # sleep(.2)
+    # plt.close()
+
+
 def main():
 
     # In the scikit-learn set below, the data is shuffled using utils.resample
@@ -252,7 +265,7 @@ def main():
     temp_answers = utils.resample(temp_digits.target, random_state=0)
     images = utils.resample(temp_digits.images, random_state=0)
     target_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    num_of_training_vectors = 950 
+    num_of_training_vectors = 1000
     answers, answers_to_test, validation_answers = temp_answers[:num_of_training_vectors], temp_answers[num_of_training_vectors:num_of_training_vectors+500], temp_answers[num_of_training_vectors+500:]
     training_set, testing_set, validation_set = digits[:num_of_training_vectors], digits[num_of_training_vectors:num_of_training_vectors+500], digits[num_of_training_vectors+500:]
 
@@ -263,9 +276,46 @@ def main():
     network = Network(images, target_values, len(training_set[0]),
                       training_vectors, answers, test_vectors, answers_to_test,
                       validation_set, validation_answers)
-    [network.learn_run() for x in range(250)]  # Number of Epochs over set
-    network.report_results(network.run_unseen())
-    network.report_results(network.run_unseen(True), True)
+    # [network.learn_run() for x in range(250)]  # Number of Epochs over set
+        # network.report_results(network.run_unseen())
+        # network.report_results(network.run_unseen(True), True)
+    
+    # plt.ion()
+    # with open("weight_set.txt", 'w') as w:
+    #     for elem in network.neurons:
+    #         for x in elem.weights:
+    #             y = str(x) + ', '
+    #             w.write(y)
+
+    with open("weight_set.txt", 'r') as w:
+        for line in w:
+            weights = line.strip().split(', ')
+    
+
+    w_list = [float(elem.replace(',', '')) for elem in weights]
+    for x in range(10):
+        network.neurons[x].weights = w_list[:64]
+        w_list = w_list[64:] 
+    print(network.neurons[1].weights)
+    x = np.random.normal(128, 1, (8, 8))
+    y = x.flatten()
+    network.test_set = [y]
+    visualization(y)
+    guess = network.run_unseen()
+    print(guess)
+    # print(y)
+    # input("Hit a key to continue")
+    target_values.remove(guess[0])
+    for i in range(5000):
+        y = feedback(y, network.neurons[guess[0]].weights, 7)
+        for x in target_values:
+            y = feedback(y, network.neurons[x].weights, -.15)
+    visualization(y)
+        # print(y)
+    network.test_set = [y]
+    guess = network.run_unseen()
+    print(guess)
+
 
 if __name__ == '__main__':
     main()
