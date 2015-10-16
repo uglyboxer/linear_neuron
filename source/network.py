@@ -246,7 +246,7 @@ def append_bias(vector):
 
 def visualization(vector, vector_name):
     y = np.reshape(vector, (8,8))
-    plt.imshow(y, cmap=cm.jet)#cm.Greys_r)
+    plt.imshow(y, cmap=cm.Greys_r)
     plt.suptitle(vector_name)
     plt.axis('off')
     plt.pause(0.0001)
@@ -301,23 +301,27 @@ def main():
     print(network.neurons[1].weights)
     x = np.random.normal(128, 1, (8, 8))
     y = x.flatten()
-    # y = network.test_set[0][:-1]
+    # y = network.train_set[4][:-1]
     network.test_set = [y]
-    visualization(y, 'Gaussian Noise')
+    # visualization(y, answers[4])
     guess = network.run_unseen()
     print(guess)
     # print(y)
     # input("Hit a key to continue")
-    target_values.remove(guess[0])
-    for i in range(15):
-        for i in range(5):
-            y = feedback(y, network.neurons[guess[0]].weights, .001)
-            for x in target_values:
-                y = feedback(y, network.neurons[x].weights, -.0001)
-        visualization(y, 'Dreamt a ' + str(guess[0]))
-        network.test_set = [y]
-        guess = network.run_unseen()
-        print(guess)
+    # target_values.remove(guess[0])
+    # for i in range(4):
+    #     for i in range(25):
+    #         y = feedback(y, network.neurons[guess[0]].weights, .001)
+    #         for x in target_values:
+    #             y = feedback(y, network.neurons[x].weights, -.0001)
+    #     visualization(y, 'Dreamt a ' + str(guess[0]))
+    #     network.test_set = [y]
+    #     guess = network.run_unseen()
+    #     print(guess)
+
+    for x in range(10):
+        y = [x+100 for x in network.neurons[x].weights]
+        visualization(y, 'weight_set: ' + str(x))
 
 
 if __name__ == '__main__':
