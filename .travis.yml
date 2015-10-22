@@ -4,9 +4,7 @@ python:
 
 # uncomment this line if your project needs to run something other than `rake`:
 # script: bundle exec rspec spec
-script: py.test --cov-report term-missing --cov=blackjack
 
 branches:
   only:
     - master
-   
